@@ -141,6 +141,7 @@ mosaicplot(df.train$Embarked ~ df.train$Survived,
 Just one more graph, then we'll get to those missing ages.  The [corrgram package](http://cran.r-project.org/web/packages/corrgram/) is the source of a function for creating what is sometimes referred to as a correlogram.  The one shown below confirms a couple of observations already made -- namely, that survival odds drop with class, and age may not prove to be a significant predictor.  Given that the upper class ranks tend to be represented by an older demographic, an inverse correlation between age and traveling class is to be expected.  Although fare and class are closely related, it might be worth throwing the **Fare** feature into the mix as another way to define a passenger's location on the ship. 
 ```sh
 require(corrgram)
+require(plyr)     # for the revalue function
 corrgram.data <- df.train
 ## change features of factor type to numeric type for inclusion on correlogram
 corrgram.data$Survived <- as.numeric(corrgram.data$Survived)
@@ -196,8 +197,8 @@ The title "Miss" should help with differentiation betweeen younger and older fem
 ## function for extracting honorific (i.e. title) from the Name feature
 getTitle <- function(data) {
   title.dot.start <- regexpr("\\,[A-Z ]{1,20}\\.", data$Name, TRUE)
-  title.comma.end <- title.dot.start 
-                     + attr(title.dot.start, "match.length")-1
+  title.comma.end <- title.dot.start +
+                     attr(title.dot.start, "match.length")-1
   data$Title <- substr(data$Name, title.dot.start+2, title.comma.end-1)
   return (data$Title)
 }   
@@ -332,7 +333,7 @@ Recall from the ``` bystats``` results above that the training data contains 17 
 df.train$Title <- factor(df.train$Title,
                          c("Capt","Col","Major","Sir","Lady","Rev",
                          "Dr","Don","Jonkheer","the Countess","Mrs",
-                         "Ms","Mr","Mme","Mlle","Miss","Master"))
+                         "Ms","Mr","Mme","Mlle","Miss","Master", "Noble"))
 boxplot(df.train$Age ~ df.train$Title, 
         main="Passenger Age by Title", xlab="Title", ylab="Age")
 ```
@@ -360,7 +361,6 @@ I assigned the Countess of Rothes, a woman in first class and the sole passenger
 
 All of the work done designing the new **Title** column can be considered a part of **feature engineering**.  The other features I chose to add are generated using custom function ``` featureEngrg```, which can be applied to both the training data in **df.train** and the Kaggle-provided test data in **df.infer**.
 ```sh
-require(plyr)     # for the revalue function 
 require(stringr)  # for the str_sub function
 
 ## test a character as an EVEN single digit
